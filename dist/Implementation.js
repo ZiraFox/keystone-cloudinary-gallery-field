@@ -1,6 +1,6 @@
 const {
   CloudinaryImage
-} = require('@keystonejs/fields');
+} = require('@keystonejs/fields-cloudinary-image');
 
 const {
   MongooseFieldAdapter

@@ -1,4 +1,4 @@
-const { CloudinaryImage } = require('@keystonejs/fields');
+const { CloudinaryImage } = require('@keystonejs/fields-cloudinary-image');
 const { MongooseFieldAdapter } = require('@keystonejs/adapter-mongoose');
 const { KnexFieldAdapter } = require('@keystonejs/adapter-knex');
 const { Types: MongooseTypes } = require('mongoose');
