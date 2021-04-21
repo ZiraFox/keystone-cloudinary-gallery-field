@@ -44,6 +44,7 @@ class CloudinaryGallery extends CloudinaryImage.implementation {
         input CloudinaryGalleryImageInput {
             caption: String
             image: Upload
+            existingImage: String
         }
         input CloudinaryGalleryInput {
             images: [CloudinaryGalleryImageInput]
@@ -75,6 +76,8 @@ class CloudinaryGallery extends CloudinaryImage.implementation {
 
     if (!newValue.images) return;
     newValue.images = await Promise.all(newValue.images.map(async data => {
+      data.image = data.existingImage ? JSON.parse(data.existingImage) : data.image;
+
       if (data.image) {
         const {
           createReadStream,
@@ -114,8 +117,6 @@ class CloudinaryGallery extends CloudinaryImage.implementation {
           image: existing.image
         };
       }
-
-      return data;
     }));
     return newValue;
   }

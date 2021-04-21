@@ -21,7 +21,7 @@ const reducer = (state, action) => {
   switch (action.type) {
     case 'create': {
       // There's already an empty one to edit
-      const existing = state.images.find(x => !x.image);
+      const existing = state.images.find((x) => !x.image);
       if (existing) return { ...state, currentlyEditing: existing.id };
 
       // Insert a new empty entry to edit
@@ -51,7 +51,7 @@ const reducer = (state, action) => {
       return {
         ...state,
         error: null,
-        images: state.images.map(item => {
+        images: state.images.map((item) => {
           const { id, ...payloadProps } = action.payload;
           return item.id === id
             ? {
@@ -73,7 +73,7 @@ const reducer = (state, action) => {
     case 'update-caption': {
       return {
         ...state,
-        images: state.images.map(image =>
+        images: state.images.map((image) =>
           image.id !== state.currentlyEditing ? image : { ...image, caption: action.payload }
         ),
       };
@@ -89,7 +89,7 @@ const reducer = (state, action) => {
     case 'remove-image': {
       return {
         ...state,
-        images: state.images.filter(x => x.id !== action.payload),
+        images: state.images.filter((x) => x.id !== action.payload),
         currentlyEditing: null,
       };
     }
@@ -107,43 +107,49 @@ const reducer = (state, action) => {
   }
 };
 
-const getDataURI = file =>
+const getDataURI = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onerror = err => reject(err);
-    reader.onloadend = upload => resolve(upload.target.result);
+    reader.onerror = (err) => reject(err);
+    reader.onloadend = (upload) => resolve(upload.target.result);
   });
 
-const getImageSrc = image => image?.publicUrlTransformed ?? image;
+const getImageSrc = (image) => image?.publicUrlTransformed ?? image;
 
 const CloudinaryGalleryField = ({ field, value, onChange, autoFocus, errors }) => {
   const [state, dispatch] = React.useReducer(reducer, {
     error: null,
     currentlyEditing: null,
     images:
-      (value?.images ?? []).map(item => ({
+      (value?.images ?? []).map((item) => ({
         ...item,
         id: uniqueString(),
       })) ?? [],
   });
 
   const currentlyEditing = state.currentlyEditing
-    ? state.images.find(x => x.id === state.currentlyEditing)
+    ? state.images.find((x) => x.id === state.currentlyEditing)
     : null;
 
   const memoizedImages = React.useMemo(
     () =>
       state.images
-        .filter(x => x.image)
-        .map(x => ({
-          caption: x.caption,
-          image: x.upload || x.image,
-        })),
+        .filter((x) => x.image)
+        .map((x) => {
+          const out = { caption: x.caption };
+          if (x.upload instanceof File) {
+            out.image = x.upload;
+          } else {
+            out.existingImage = JSON.stringify(x.image);
+          }
+          return out;
+        }),
     [state.images]
   );
 
   React.useEffect(() => {
+    console.log(memoizedImages);
     onChange({ images: memoizedImages });
   }, [onChange, memoizedImages]);
 
@@ -194,14 +200,14 @@ const CloudinaryGalleryField = ({ field, value, onChange, autoFocus, errors }) =
         >
           <FieldInput>
             <FieldGallery
-              images={state.images.map(x => ({
+              images={state.images.map((x) => ({
                 id: x.id,
                 src: getImageSrc(x.image),
                 caption: x.caption,
                 isEditing: x.id === currentlyEditing?.id,
               }))}
               onCreate={() => dispatch({ type: 'create' })}
-              onEdit={id => dispatch({ type: 'edit', payload: id })}
+              onEdit={(id) => dispatch({ type: 'edit', payload: id })}
               onMove={(from, to) => dispatch({ type: 'move-image', payload: { from, to } })}
             />
           </FieldInput>
@@ -222,7 +228,7 @@ const CloudinaryGalleryField = ({ field, value, onChange, autoFocus, errors }) =
                   showRemove={!!currentlyEditing.image}
                   error={state.error}
                   onUpload={handleUpload}
-                  onChangeCaption={caption =>
+                  onChangeCaption={(caption) =>
                     dispatch({ type: 'update-caption', payload: caption })
                   }
                   onRemove={() => dispatch({ type: 'remove-image', payload: currentlyEditing.id })}

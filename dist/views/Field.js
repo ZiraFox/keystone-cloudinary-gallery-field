@@ -137,11 +137,21 @@ const CloudinaryGalleryField = ({
     }))) !== null && _map !== void 0 ? _map : []
   });
   const currentlyEditing = state.currentlyEditing ? state.images.find(x => x.id === state.currentlyEditing) : null;
-  const memoizedImages = React.useMemo(() => state.images.filter(x => x.image).map(x => ({
-    caption: x.caption,
-    image: x.upload || x.image
-  })), [state.images]);
+  const memoizedImages = React.useMemo(() => state.images.filter(x => x.image).map(x => {
+    const out = {
+      caption: x.caption
+    };
+
+    if (x.upload instanceof File) {
+      out.image = x.upload;
+    } else {
+      out.existingImage = JSON.stringify(x.image);
+    }
+
+    return out;
+  }), [state.images]);
   React.useEffect(() => {
+    console.log(memoizedImages);
     onChange({
       images: memoizedImages
     });
